@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { boardAPI, invitationAPI } from '../services/api';
 import { Board, Invitation } from '../types';
@@ -20,18 +20,14 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({ boardId, onClose,
   const [success, setSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<'members' | 'invite'>('members');
 
-  useEffect(() => {
-    fetchBoardData();
-  }, [boardId]);
-
-  const fetchBoardData = async () => {
+  const fetchBoardData = useCallback(async () => {
     try {
       // Only fetch board data if user is likely a member (board owner or accepted member)
       const [boardData, invitationsData] = await Promise.allSettled([
         boardAPI.getBoard(boardId),
         invitationAPI.getBoardInvitations(boardId)
       ]);
-      
+
       // Handle board data fetch (might fail if user is not a member yet)
       if (boardData.status === 'fulfilled') {
         setBoard(boardData.value);
@@ -40,7 +36,7 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({ boardId, onClose,
         // This handles the case where user is invited but hasn't accepted yet
         console.log('Board access denied (user not member yet):', boardData.reason);
       }
-      
+
       // Handle invitation data fetch
       if (invitationsData.status === 'fulfilled') {
         setInvitations(invitationsData.value);
@@ -50,7 +46,11 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({ boardId, onClose,
     } catch (err) {
       console.error('Failed to fetch board data:', err);
     }
-  };
+  }, [boardId]);
+
+  useEffect(() => {
+    fetchBoardData();
+  }, [fetchBoardData]);
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,7 +131,6 @@ const InviteMemberModal: React.FC<InviteMemberModalProps> = ({ boardId, onClose,
     return member.user._id !== owner._id;
   }).map(member => member.user).filter(user => user !== null) || [];
   const pendingInvitations = invitations.filter(inv => inv.status === 'pending');
-  const acceptedInvitations = invitations.filter(inv => inv.status === 'accepted');
 
   return (
     <div className="modal-overlay" onClick={onClose}>

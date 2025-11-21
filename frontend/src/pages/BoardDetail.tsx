@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   DndContext,
@@ -50,13 +50,7 @@ const BoardDetail: React.FC = () => {
     useSensor(KeyboardSensor)
   );
 
-  useEffect(() => {
-    if (id) {
-      fetchBoard();
-    }
-  }, [id]);
-
-  const fetchBoard = async () => {
+  const fetchBoard = useCallback(async () => {
     try {
       const data = await boardAPI.getBoard(id!);
       setBoard(data);
@@ -67,7 +61,13 @@ const BoardDetail: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id, navigate]);
+
+  useEffect(() => {
+    if (id) {
+      fetchBoard();
+    }
+  }, [id, fetchBoard]);
 
   const fetchRecommendations = async () => {
     try {
