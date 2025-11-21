@@ -36,6 +36,59 @@ A full-stack Trello-like task board application with modern UI, drag-and-drop fu
 - React Router for navigation
 - Axios for API calls
 
+## Database Schema
+
+The application uses MongoDB with Mongoose to store data. Here's a simple explanation of how the data is organized:
+
+### User Collection
+Stores user account information:
+- **name**: User's full name
+- **email**: Unique email address for login
+- **password**: Securely hashed password (never stored in plain text)
+- **avatar**: Optional profile picture URL
+- **createdAt**: When the account was created
+
+### Board Collection
+Represents project boards (like Trello boards):
+- **title**: Board name (e.g., "Website Redesign")
+- **description**: Optional description of the project
+- **owner**: Reference to the user who created the board
+- **members**: Array of users who can access the board (with roles: owner/member)
+- **backgroundColor**: Hex color for board background
+- **isArchived**: Whether the board is hidden (soft delete)
+
+### List Collection
+Represents columns on a board (like "To Do", "In Progress", "Done"):
+- **title**: Column name
+- **board**: Which board this column belongs to
+- **position**: Order of columns (0, 1, 2, etc.)
+- **isArchived**: Whether the column is hidden
+
+### Card Collection
+Represents individual tasks/cards:
+- **title**: Task name
+- **description**: Detailed task information
+- **list**: Which column the card is in
+- **board**: Which board the card belongs to
+- **position**: Order within the column
+- **dueDate**: Optional deadline
+- **labels**: Colored tags (like "urgent", "bug", "feature")
+- **assignee**: Which user is responsible for this task
+- **isCompleted**: Whether the task is done
+- **isArchived**: Whether the card is hidden
+- **createdBy**: Who created the card
+- **createdAt/updatedAt**: Timestamps
+
+### Invitation Collection
+Handles board invitations:
+- **board**: Which board the invitation is for
+- **inviter**: Who sent the invitation
+- **invitee**: Who received the invitation
+- **status**: pending/accepted/declined/cancelled
+- **message**: Optional personal message
+- **expiresAt**: When the invitation expires (7 days)
+- **acceptedAt/declinedAt**: When action was taken
+
 ## Project Structure
 
 ```
