@@ -34,9 +34,9 @@ const InvitationNotifications: React.FC<InvitationNotificationsProps> = ({ onInv
     setAcceptingId(invitationId);
     try {
       const result = await invitationAPI.acceptInvitation(invitationId);
-      setInvitations(invitations.filter(inv => inv._id !== invitationId));
+      setInvitations(invitations.filter((inv) => inv._id !== invitationId));
       onInvitationAccepted();
-      
+
       // Show success message
       alert(`Successfully joined "${result.board.title}"!`);
     } catch (err: any) {
@@ -53,7 +53,7 @@ const InvitationNotifications: React.FC<InvitationNotificationsProps> = ({ onInv
 
     try {
       await invitationAPI.declineInvitation(invitationId);
-      setInvitations(invitations.filter(inv => inv._id !== invitationId));
+      setInvitations(invitations.filter((inv) => inv._id !== invitationId));
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to decline invitation');
     }
@@ -69,69 +69,146 @@ const InvitationNotifications: React.FC<InvitationNotificationsProps> = ({ onInv
 
   return (
     <div className="mb-6">
-      <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-        📬 Pending Invitations ({invitations.length})
-      </h3>
-      
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+          <span className="text-xl">📬</span>
+          <span>Pending Invitations</span>
+        </h3>
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-sky-50 text-sky-700 border border-sky-100">
+          {invitations.length} pending
+        </span>
+      </div>
+
       <div className="space-y-3">
         {invitations.map((invitation) => (
           <div
             key={invitation._id}
-            className="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-sm"
+            className="
+              bg-white
+              border border-slate-200
+              rounded-xl
+              p-4
+              shadow-sm
+              hover:shadow-md
+              transition-shadow
+            "
           >
-            <div className="flex items-start justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+              {/* Left: Board info + message */}
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-start gap-3">
                   <div
-                    className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-semibold text-lg"
+                    className="
+                      w-12 h-12
+                      rounded-xl
+                      flex items-center justify-center
+                      text-white font-semibold text-lg
+                      shadow-sm
+                      border border-white/70
+                    "
                     style={{ backgroundColor: invitation.board.backgroundColor }}
                   >
                     {invitation.board.title.charAt(0).toUpperCase()}
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900">
-                      {invitation.board.title}
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      Invited by <span className="font-medium">{invitation.inviter.name}</span>
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-semibold text-slate-900">
+                        {invitation.board.title}
+                      </h4>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-100">
+                        New invite
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-600">
+                      Invited by{' '}
+                      <span className="font-medium text-slate-800">
+                        {invitation.inviter.name}
+                      </span>
                     </p>
                   </div>
                 </div>
-                
+
                 {invitation.message && (
-                  <div className="mt-2">
+                  <div className="mt-3">
                     <button
-                      onClick={() => setExpandedNotification(
-                        expandedNotification === invitation._id ? null : invitation._id
-                      )}
-                      className="text-sm text-blue-600 hover:text-blue-800 underline"
+                      onClick={() =>
+                        setExpandedNotification(
+                          expandedNotification === invitation._id ? null : invitation._id
+                        )
+                      }
+                      className="
+                        text-xs
+                        inline-flex items-center gap-1
+                        text-sky-600 hover:text-sky-800
+                        font-medium
+                      "
                     >
-                      {expandedNotification === invitation._id ? 'Hide message' : 'Show message'}
+                      <span>
+                        {expandedNotification === invitation._id
+                          ? 'Hide message'
+                          : 'Show message'}
+                      </span>
+                      <span className="text-[10px]">
+                        {expandedNotification === invitation._id ? '▲' : '▼'}
+                      </span>
                     </button>
-                    
+
                     {expandedNotification === invitation._id && (
-                      <div className="mt-2 p-3 bg-white border border-blue-200 rounded text-sm text-gray-700">
-                        "{invitation.message}"
+                      <div className="mt-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700">
+                        “{invitation.message}”
                       </div>
                     )}
                   </div>
                 )}
               </div>
-              
-              <div className="flex gap-2 ml-4">
+
+              {/* Right: Actions */}
+              <div className="flex sm:flex-col gap-2 sm:ml-4 sm:w-36 justify-end sm:justify-start">
                 <button
                   onClick={() => handleDecline(invitation._id)}
-                  className="px-3 py-1 text-sm text-gray-600 hover:text-red-600 border border-gray-300 rounded hover:border-red-300"
+                  className="
+                    px-3 py-1.5
+                    text-sm
+                    rounded-lg
+                    border
+                    border-slate-300
+                    text-slate-600
+                    hover:text-red-600
+                    hover:border-red-200
+                    bg-white
+                    transition
+                    disabled:opacity-60
+                  "
                   disabled={acceptingId === invitation._id}
                 >
                   Decline
                 </button>
                 <button
                   onClick={() => handleAccept(invitation._id)}
-                  className="px-3 py-1 text-sm bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
+                  className="
+                    px-3 py-1.5
+                    text-sm
+                    rounded-lg
+                    bg-emerald-500
+                    text-white
+                    font-medium
+                    hover:bg-emerald-600
+                    shadow-sm
+                    shadow-emerald-900/40
+                    transition
+                    disabled:opacity-60
+                    inline-flex items-center justify-center gap-1
+                  "
                   disabled={acceptingId === invitation._id}
                 >
-                  {acceptingId === invitation._id ? 'Joining...' : 'Accept'}
+                  {acceptingId === invitation._id ? (
+                    <>
+                      <span className="h-3 w-3 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                      <span>Joining...</span>
+                    </>
+                  ) : (
+                    'Accept'
+                  )}
                 </button>
               </div>
             </div>
