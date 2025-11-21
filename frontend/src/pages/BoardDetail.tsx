@@ -36,6 +36,7 @@ const BoardDetail: React.FC = () => {
   const [selectedCard, setSelectedCard] = useState<CardType | null>(null);
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [recommendations, setRecommendations] = useState<Recommendations | null>(null);
+  const [recommendationsCount, setRecommendationsCount] = useState(0);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [newListTitle, setNewListTitle] = useState('');
   const [isAddingList, setIsAddingList] = useState(false);
@@ -66,6 +67,7 @@ const BoardDetail: React.FC = () => {
   useEffect(() => {
     if (id) {
       fetchBoard();
+      updateRecommendationsCount();
     }
   }, [id, fetchBoard]);
 
@@ -76,6 +78,20 @@ const BoardDetail: React.FC = () => {
       setShowRecommendations(true);
     } catch (err) {
       console.error('Failed to fetch recommendations:', err);
+    }
+  };
+
+  const updateRecommendationsCount = async () => {
+    try {
+      const data = await boardAPI.getRecommendations(id!);
+      const count =
+        data.dueDateSuggestions.length +
+        data.listMovementSuggestions.length +
+        data.relatedCards.length;
+      setRecommendationsCount(count);
+    } catch (err) {
+      console.error('Failed to fetch recommendations count:', err);
+      setRecommendationsCount(0);
     }
   };
 
@@ -199,6 +215,7 @@ const BoardDetail: React.FC = () => {
             : list
         )
       );
+      updateRecommendationsCount();
     } catch (err) {
       console.error('Failed to create card:', err);
     }
@@ -249,6 +266,7 @@ const BoardDetail: React.FC = () => {
 
   const handleApplyDueDate = async (cardId: string, dueDate: string) => {
     await handleUpdateCard(cardId, { dueDate });
+    setRecommendationsCount(prev => Math.max(0, prev - 1));
     fetchRecommendations();
   };
 
@@ -259,6 +277,7 @@ const BoardDetail: React.FC = () => {
     try {
       await cardAPI.moveCard(cardId, listId, 0);
       fetchBoard();
+      setRecommendationsCount(prev => Math.max(0, prev - 1));
       fetchRecommendations();
     } catch (err) {
       console.error('Failed to move card:', err);
@@ -366,17 +385,27 @@ const BoardDetail: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={fetchRecommendations}
-                    className="hidden sm:inline-flex items-center gap-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 px-3 py-1.5 text-xs sm:text-sm text-sky-50 font-medium transition"
+                    className="hidden sm:inline-flex items-center gap-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 px-3 py-1.5 text-xs sm:text-sm text-sky-50 font-medium transition relative"
                   >
                     <span>💡</span>
                     <span>Insights</span>
+                    {recommendationsCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-amber-400 text-slate-900 text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                        {recommendationsCount > 99 ? '99+' : recommendationsCount}
+                      </span>
+                    )}
                   </button>
                   <button
                     onClick={fetchRecommendations}
-                    className="sm:hidden inline-flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/25 px-2.5 py-1.5 text-xs text-sky-50 font-medium transition"
+                    className="sm:hidden inline-flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 border border-white/25 px-2.5 py-1.5 text-xs text-sky-50 font-medium transition relative"
                     title="AI Recommendations"
                   >
                     💡
+                    {recommendationsCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-amber-400 text-slate-900 text-[10px] font-bold rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-0.5">
+                        {recommendationsCount > 9 ? '9+' : recommendationsCount}
+                      </span>
+                    )}
                   </button>
 
                   <button
