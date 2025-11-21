@@ -49,7 +49,24 @@ app.use('/api/invitations', invitationRoutes);
 
 // Health check route
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server is running' });
+  res.json({ status: 'OK', message: 'Trello Clone Backend is running successfully!' });
+});
+
+// Root route
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Trello Clone Backend API',
+    status: 'Running',
+    version: '1.0.0',
+    endpoints: {
+      auth: '/api/auth',
+      boards: '/api/boards',
+      lists: '/api/lists',
+      cards: '/api/cards',
+      invitations: '/api/invitations',
+      health: '/api/health'
+    }
+  });
 });
 
 // Error handling middleware
