@@ -24,8 +24,7 @@ const corsOptions = {
 
     const allowedOrigins = [
       'http://localhost:3000', // Development
-      'https://your-netlify-site.netlify.app', // Replace with your actual Netlify domain
-      // Add your Render backend URL if needed for testing
+      'https://trellox.netlify.app', 
     ];
 
     if (allowedOrigins.indexOf(origin) !== -1) {
