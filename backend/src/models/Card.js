@@ -64,7 +64,6 @@ const cardSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for efficient querying
 cardSchema.index({ list: 1, position: 1 });
 cardSchema.index({ board: 1 });
 

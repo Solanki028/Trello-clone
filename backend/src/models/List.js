@@ -31,14 +31,12 @@ const listSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Virtual populate for cards
 listSchema.virtual('cards', {
   ref: 'Card',
   localField: '_id',
   foreignField: 'list'
 });
 
-// Index for efficient querying
 listSchema.index({ board: 1, position: 1 });
 
 module.exports = mongoose.model('List', listSchema);

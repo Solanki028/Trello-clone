@@ -50,37 +50,30 @@ const boardSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Virtual populate for lists
 boardSchema.virtual('lists', {
   ref: 'List',
   localField: '_id',
   foreignField: 'board'
 });
 
-// Check if user is a member of the board
 boardSchema.methods.isMember = function(userId) {
   const userIdStr = userId.toString();
-  // Handle both populated and non-populated owner field
   const ownerId = this.owner && this.owner._id ? this.owner._id.toString() : this.owner.toString();
   if (ownerId === userIdStr) return true;
-  
-  // Check members with null safety
+
   return this.members.some(member => {
     if (!member || !member.user) return false;
-    
-    // Handle both populated (object) and non-populated (ObjectId) user references
+
     const memberId = member.user._id ? member.user._id.toString() : member.user.toString();
     return memberId === userIdStr;
   });
 };
 
-// Remove member from board (for testing/cleanup purposes)
 boardSchema.methods.removeMember = function(userId) {
   const userIdStr = userId.toString();
   this.members = this.members.filter(member => {
     if (!member || !member.user) return true;
-    
-    // Handle both populated (object) and non-populated (ObjectId) user references
+
     const memberId = member.user._id ? member.user._id.toString() : member.user.toString();
     return memberId !== userIdStr;
   });

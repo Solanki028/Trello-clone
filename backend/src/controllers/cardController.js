@@ -2,14 +2,10 @@ const Card = require('../models/Card');
 const List = require('../models/List');
 const Board = require('../models/Board');
 
-// @desc    Create card
-// @route   POST /api/cards
-// @access  Private
 const createCard = async (req, res) => {
   try {
     const { title, description, listId, boardId, dueDate, labels } = req.body;
 
-    // Check if board exists and user is a member
     const board = await Board.findById(boardId);
     if (!board) {
       return res.status(404).json({ message: 'Board not found' });
@@ -19,13 +15,11 @@ const createCard = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to add cards to this board' });
     }
 
-    // Check if list exists
     const list = await List.findById(listId);
     if (!list) {
       return res.status(404).json({ message: 'List not found' });
     }
 
-    // Get the highest position
     const lastCard = await Card.findOne({ list: listId }).sort({ position: -1 });
     const position = lastCard ? lastCard.position + 1 : 0;
 
@@ -51,9 +45,6 @@ const createCard = async (req, res) => {
   }
 };
 
-// @desc    Update card
-// @route   PUT /api/cards/:id
-// @access  Private
 const updateCard = async (req, res) => {
   try {
     const card = await Card.findById(req.params.id);
@@ -62,7 +53,6 @@ const updateCard = async (req, res) => {
       return res.status(404).json({ message: 'Card not found' });
     }
 
-    // Check if user is a board member
     const board = await Board.findById(card.board);
     if (!board.isMember(req.user._id)) {
       return res.status(403).json({ message: 'Not authorized to update this card' });
@@ -90,9 +80,6 @@ const updateCard = async (req, res) => {
   }
 };
 
-// @desc    Move card to different list
-// @route   PUT /api/cards/:id/move
-// @access  Private
 const moveCard = async (req, res) => {
   try {
     const card = await Card.findById(req.params.id);
@@ -101,7 +88,6 @@ const moveCard = async (req, res) => {
       return res.status(404).json({ message: 'Card not found' });
     }
 
-    // Check if user is a board member
     const board = await Board.findById(card.board);
     if (!board.isMember(req.user._id)) {
       return res.status(403).json({ message: 'Not authorized to move this card' });
@@ -109,7 +95,6 @@ const moveCard = async (req, res) => {
 
     const { listId, position } = req.body;
 
-    // Check if new list exists
     const newList = await List.findById(listId);
     if (!newList) {
       return res.status(404).json({ message: 'List not found' });
@@ -117,12 +102,10 @@ const moveCard = async (req, res) => {
 
     const oldListId = card.list;
 
-    // Update card's list and position
     card.list = listId;
     card.position = position;
     await card.save();
 
-    // Reorder cards in old list
     if (oldListId.toString() !== listId.toString()) {
       const oldListCards = await Card.find({ list: oldListId }).sort({ position: 1 });
       for (let i = 0; i < oldListCards.length; i++) {
@@ -142,26 +125,20 @@ const moveCard = async (req, res) => {
   }
 };
 
-// @desc    Reorder cards within a list
-// @route   PUT /api/cards/reorder
-// @access  Private
 const reorderCards = async (req, res) => {
   try {
     const { listId, cards } = req.body;
 
-    // Check if list exists
     const list = await List.findById(listId);
     if (!list) {
       return res.status(404).json({ message: 'List not found' });
     }
 
-    // Check if user is a board member
     const board = await Board.findById(list.board);
     if (!board.isMember(req.user._id)) {
       return res.status(403).json({ message: 'Not authorized to reorder cards' });
     }
 
-    // Update positions
     const updatePromises = cards.map((card, index) =>
       Card.findByIdAndUpdate(card._id, { position: index }, { new: true })
     );
@@ -180,9 +157,6 @@ const reorderCards = async (req, res) => {
   }
 };
 
-// @desc    Delete card
-// @route   DELETE /api/cards/:id
-// @access  Private
 const deleteCard = async (req, res) => {
   try {
     const card = await Card.findById(req.params.id);
@@ -191,7 +165,6 @@ const deleteCard = async (req, res) => {
       return res.status(404).json({ message: 'Card not found' });
     }
 
-    // Check if user is a board member
     const board = await Board.findById(card.board);
     if (!board.isMember(req.user._id)) {
       return res.status(403).json({ message: 'Not authorized to delete this card' });

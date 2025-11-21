@@ -51,10 +51,9 @@ const invitationSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Compound indexes for efficient queries (removed unique constraint to allow cooldown-based invitations)
 invitationSchema.index({ board: 1, invitee: 1 });
 invitationSchema.index({ inviter: 1, status: 1 });
 invitationSchema.index({ invitee: 1, status: 1 });
-invitationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 }); // Auto-delete expired invitations
+invitationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 module.exports = mongoose.model('Invitation', invitationSchema);

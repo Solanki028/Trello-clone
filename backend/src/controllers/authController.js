@@ -2,16 +2,12 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { validationResult } = require('express-validator');
 
-// Generate JWT Token
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d'
   });
 };
 
-// @desc    Register new user
-// @route   POST /api/auth/register
-// @access  Public
 const register = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -21,13 +17,11 @@ const register = async (req, res) => {
 
     const { name, email, password } = req.body;
 
-    // Check if user exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Create user
     const user = await User.create({
       name,
       email,
@@ -50,9 +44,6 @@ const register = async (req, res) => {
   }
 };
 
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
 const login = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -62,7 +53,6 @@ const login = async (req, res) => {
 
     const { email, password } = req.body;
 
-    // Check for user
     const user = await User.findOne({ email }).select('+password');
 
     if (user && (await user.matchPassword(password))) {
@@ -81,9 +71,6 @@ const login = async (req, res) => {
   }
 };
 
-// @desc    Get current user
-// @route   GET /api/auth/me
-// @access  Private
 const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);

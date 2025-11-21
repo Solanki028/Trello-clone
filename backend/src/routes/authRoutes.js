@@ -4,7 +4,6 @@ const { body } = require('express-validator');
 const { register, login, getMe } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 
-// @route   POST /api/auth/register
 router.post(
   '/register',
   [
@@ -15,7 +14,6 @@ router.post(
   register
 );
 
-// @route   POST /api/auth/login
 router.post(
   '/login',
   [
@@ -25,7 +23,6 @@ router.post(
   login
 );
 
-// @route   GET /api/auth/me
 router.get('/me', protect, getMe);
 
 module.exports = router;

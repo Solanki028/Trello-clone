@@ -1,19 +1,14 @@
 const Card = require('../models/Card');
 const List = require('../models/List');
 
-// Keywords for urgency detection
 const URGENT_KEYWORDS = ['urgent', 'asap', 'immediately', 'critical', 'emergency', 'today', 'now', 'high priority'];
 const SOON_KEYWORDS = ['soon', 'this week', 'important', 'priority'];
 const LATER_KEYWORDS = ['later', 'low priority', 'someday', 'maybe', 'future'];
 
-// Keywords for list movement suggestions
 const IN_PROGRESS_KEYWORDS = ['started', 'working on', 'in progress', 'doing', 'currently', 'wip'];
 const DONE_KEYWORDS = ['completed', 'done', 'finished', 'resolved', 'closed', 'tested', 'deployed'];
 const BLOCKED_KEYWORDS = ['blocked', 'waiting', 'stuck', 'issue', 'problem'];
 
-/**
- * Suggest due date based on card content
- */
 const suggestDueDate = (card) => {
   const text = `${card.title} ${card.description}`.toLowerCase();
   
@@ -59,9 +54,6 @@ const suggestDueDate = (card) => {
   return null;
 };
 
-/**
- * Suggest list movement based on card content
- */
 const suggestListMovement = async (card, lists) => {
   const text = `${card.title} ${card.description}`.toLowerCase();
   const currentList = lists.find(l => l._id.toString() === card.list.toString());
@@ -133,9 +125,6 @@ const suggestListMovement = async (card, lists) => {
   return null;
 };
 
-/**
- * Find related cards based on keyword similarity
- */
 const findRelatedCards = (cards) => {
   const relatedGroups = [];
   const processedCards = new Set();
@@ -189,9 +178,6 @@ const findRelatedCards = (cards) => {
   return relatedGroups;
 };
 
-/**
- * Generate all recommendations for a board
- */
 const generateRecommendations = async (boardId) => {
   try {
     // Get all cards and lists for the board

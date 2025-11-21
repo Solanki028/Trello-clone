@@ -2,9 +2,6 @@ const Invitation = require('../models/Invitation');
 const Board = require('../models/Board');
 const User = require('../models/User');
 
-// @desc    Send invitation to board
-// @route   POST /api/invitations
-// @access  Private (Board Owner only)
 const sendInvitation = async (req, res) => {
   try {
     const { boardId, email, message } = req.body;

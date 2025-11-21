@@ -3,9 +3,6 @@ const List = require('../models/List');
 const Card = require('../models/Card');
 const User = require('../models/User');
 
-// @desc    Get all boards for user
-// @route   GET /api/boards
-// @access  Private
 const getBoards = async (req, res) => {
   try {
     const boards = await Board.find({
@@ -26,9 +23,6 @@ const getBoards = async (req, res) => {
   }
 };
 
-// @desc    Get single board
-// @route   GET /api/boards/:id
-// @access  Private
 const getBoard = async (req, res) => {
   try {
     const board = await Board.findById(req.params.id)
@@ -39,12 +33,10 @@ const getBoard = async (req, res) => {
       return res.status(404).json({ message: 'Board not found' });
     }
 
-    // Check if user is a member
     if (!board.isMember(req.user._id)) {
       return res.status(403).json({ message: 'Not authorized to access this board' });
     }
 
-    // Get lists with cards
     const lists = await List.find({ board: board._id, isArchived: false })
       .sort({ position: 1 });
 
@@ -71,9 +63,6 @@ const getBoard = async (req, res) => {
   }
 };
 
-// @desc    Create board
-// @route   POST /api/boards
-// @access  Private
 const createBoard = async (req, res) => {
   try {
     const { title, description, backgroundColor } = req.body;
@@ -100,9 +89,6 @@ const createBoard = async (req, res) => {
   }
 };
 
-// @desc    Update board
-// @route   PUT /api/boards/:id
-// @access  Private
 const updateBoard = async (req, res) => {
   try {
     const board = await Board.findById(req.params.id);
@@ -111,7 +97,6 @@ const updateBoard = async (req, res) => {
       return res.status(404).json({ message: 'Board not found' });
     }
 
-    // Check if user is owner
     if (board.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized to update this board' });
     }
@@ -135,9 +120,6 @@ const updateBoard = async (req, res) => {
   }
 };
 
-// @desc    Delete board
-// @route   DELETE /api/boards/:id
-// @access  Private
 const deleteBoard = async (req, res) => {
   try {
     const board = await Board.findById(req.params.id);
@@ -146,12 +128,10 @@ const deleteBoard = async (req, res) => {
       return res.status(404).json({ message: 'Board not found' });
     }
 
-    // Check if user is owner
     if (board.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized to delete this board' });
     }
 
-    // Delete all lists and cards associated with the board
     await List.deleteMany({ board: board._id });
     await Card.deleteMany({ board: board._id });
     await board.deleteOne();
@@ -163,9 +143,6 @@ const deleteBoard = async (req, res) => {
   }
 };
 
-// @desc    Add member to board
-// @route   POST /api/boards/:id/members
-// @access  Private
 const addMember = async (req, res) => {
   try {
     const board = await Board.findById(req.params.id);
@@ -174,21 +151,18 @@ const addMember = async (req, res) => {
       return res.status(404).json({ message: 'Board not found' });
     }
 
-    // Check if user is owner
     if (board.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Only board owner can add members' });
     }
 
     const { email } = req.body;
 
-    // Find user by email
     const userToAdd = await User.findOne({ email });
 
     if (!userToAdd) {
       return res.status(404).json({ message: 'User not found with that email' });
     }
 
-    // Check if user is already a member
     if (board.isMember(userToAdd._id)) {
       return res.status(400).json({ message: 'User is already a member' });
     }
@@ -211,9 +185,6 @@ const addMember = async (req, res) => {
   }
 };
 
-// @desc    Remove member from board
-// @route   DELETE /api/boards/:id/members/:userId
-// @access  Private (Board Owner only)
 const removeMember = async (req, res) => {
   try {
     const board = await Board.findById(req.params.id);
@@ -222,17 +193,14 @@ const removeMember = async (req, res) => {
       return res.status(404).json({ message: 'Board not found' });
     }
 
-    // Check if user is owner
     if (board.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Only board owner can remove members' });
     }
 
-    // Cannot remove owner
     if (req.params.userId === board.owner.toString()) {
       return res.status(400).json({ message: 'Cannot remove board owner' });
     }
 
-    // Use the helper method to remove member
     board.removeMember(req.params.userId);
     await board.save();
 
